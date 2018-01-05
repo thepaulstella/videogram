@@ -6,11 +6,11 @@ var path = "";
 var outputFilename = "";
 
 process.argv.forEach(function (val, index, array) {
-  if (val.lastIndexOf("images=") > -1) {
+  if (val.match(/images=/)) {
     path = val.substring(7)
   }
 
-  if (val.lastIndexOf("video=") > -1) {
+  if (val.match(/video=/)) {
     outputFilename = val.substring(6)
   }
 });
