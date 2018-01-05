@@ -1,7 +1,30 @@
 const videoshow = require("videoshow");
 const Jimp = require("jimp");
 const fs = require('fs');
-let path = "./images/"; // TODO: Make this an arg
+
+var path = "";
+var outputFilename = "";
+
+process.argv.forEach(function (val, index, array) {
+  if (val.lastIndexOf("images=") > -1) {
+    path = val.substring(7)
+  }
+
+  if (val.lastIndexOf("video=") > -1) {
+    outputFilename = val.substring(6)
+  }
+
+});
+
+if (path == "") {
+    console.error(`requires images="path/to/images"`)
+    process.exit();
+}
+
+if (outputFilename == "") {
+  console.error(`requires video="filename-for-video"`)
+  process.exit();
+}
 
 fs.readdir(path, (err, files) => {
   let filePaths = files.map(file => path + file);
@@ -40,7 +63,7 @@ fs.readdir(path, (err, files) => {
   }
 
   videoshow(images, videoOptions)
-    .save(`videogram_${new Date()}.mp4`) // TODO: Make this an arg
+    .save(`${outputFilename}.mp4`) // TODO: Make this an arg
     .on('start', function (command) {
       console.log('ffmpeg process started:', command)
     })
