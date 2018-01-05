@@ -13,7 +13,6 @@ process.argv.forEach(function (val, index, array) {
   if (val.lastIndexOf("video=") > -1) {
     outputFilename = val.substring(6)
   }
-
 });
 
 if (path == "") {
@@ -36,7 +35,10 @@ fs.readdir(path, (err, files) => {
         
         if (img.bitmap.height > img.bitmap.width) {
           img
-            .contain(img.bitmap.height, img.bitmap.height, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_CENTER)
+            .contain(
+              img.bitmap.height, 
+              img.bitmap.height, 
+              Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_CENTER)
             .write(image)
         }
           
