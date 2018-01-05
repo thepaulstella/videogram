@@ -35,10 +35,7 @@ fs.readdir(path, (err, files) => {
         
         if (img.bitmap.height > img.bitmap.width) {
           img
-            .contain(
-              img.bitmap.height, 
-              img.bitmap.height, 
-              Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_CENTER)
+            .contain(img.bitmap.height, img.bitmap.height)
             .write(image)
         }
           
