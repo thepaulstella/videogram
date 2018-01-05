@@ -27,7 +27,7 @@ if (outputFilename == "") {
 
 fs.readdir(path, (err, files) => {
   let filePaths = files.map(file => path + file);
-  let images = filePaths.filter(file => file.indexOf(".jpg") > -1);
+  let images = filePaths.filter(file => file.match( /(.jpg|.jpeg|.png)/ ));
 
   images.map(image => {
     Jimp.read(image, (err, img) => {
@@ -65,7 +65,7 @@ fs.readdir(path, (err, files) => {
   }
 
   videoshow(images, videoOptions)
-    .save(`${outputFilename}.mp4`) // TODO: Make this an arg
+    .save(`${outputFilename}.mp4`)
     .on('start', function (command) {
       console.log('ffmpeg process started:', command)
     })
