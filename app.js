@@ -1,13 +1,10 @@
 const videoshow = require("videoshow");
 const Jimp = require("jimp");
 const fs = require('fs');
-
-let path = "./images/";
+let path = "./images/"; // TODO: Make this an arg
 
 fs.readdir(path, (err, files) => {
-
-  var filePaths = files.map(file => path + file);
-
+  let filePaths = files.map(file => path + file);
   let images = filePaths.filter(file => file.indexOf(".jpg") > -1);
 
   images.map(image => {
@@ -30,10 +27,12 @@ fs.readdir(path, (err, files) => {
     })
   })
 
-  var videoOptions = {
-    fps: 23,
-    loop: 1, // seconds
-    transition: false,
+  if (images.length > 0) {
+
+  let videoOptions = {
+    fps: 24,
+    loop: 1, // seconds TODO: Arg?
+    transition: false, // TODO: Arg?
     size: "800x?",
     videoBitrate: 2048,
     videoCodec: 'libx264',
@@ -42,7 +41,7 @@ fs.readdir(path, (err, files) => {
   }
 
   videoshow(images, videoOptions)
-    .save('video.mp4')
+    .save(`videogram_${new Date()}.mp4`) // TODO: Make this an arg
     .on('start', function (command) {
       console.log('ffmpeg process started:', command)
     })
@@ -52,7 +51,8 @@ fs.readdir(path, (err, files) => {
     })
     .on('end', function (output) {
       console.error('Video created in:', output)
-    })
+    });
+  }
 })
 
 
