@@ -17,7 +17,6 @@ fs.readdir(path, (err, files) => {
             .write(image)
         }
           
-        
         if (img.bitmap.width > img.bitmap.height) {
           img
             .contain(img.bitmap.width, img.bitmap.width)
@@ -54,7 +53,3 @@ fs.readdir(path, (err, files) => {
     });
   }
 })
-
-
-
-
