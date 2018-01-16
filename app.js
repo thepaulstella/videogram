@@ -95,7 +95,7 @@ fs.readdir(path, (err, files) => {
       console.error('ffmpeg stderr:', stderr);
     })
     .on('end', function (output) {
-      rimraf.sync(workingDirectory);
+      rimraf.sync(workingDirectory); // TODO: Won't get here if no images found
       console.log('Video created in:', output);
     });
   }
