@@ -5,7 +5,7 @@ const rimraf = require('rimraf');
 
 let path = '';
 let outputFilename = '';
-let fps = 24
+let framerate = 24
 let tempImages = [];
 let quality = 90; // TODO: Make this an arg
 
@@ -18,16 +18,16 @@ process.argv.forEach(function (val, index, array) {
     outputFilename = val.substring(6)
   }
 
-  if (val.match(/fps=/)) {
-    fps = val.substring(4)
+  if (val.match(/framerate=/)) {
+    framerate = val.substring(10)
   }
 });
 
-if (fps !== '') {
-  if (parseInt(fps)) {
-    fps = parseInt(fps)
+if (framerate !== '') {
+  if (parseInt(framerate)) {
+    framerate = parseInt(framerate)
   } else {
-    console.error(`fps must be an integer. default fps is 24. example: fps='60'`);
+    console.error(`framerate must be an integer. default framerate is 24. example: framerate='60'`);
     process.exit();
   }
 }
@@ -55,7 +55,7 @@ fs.readdir(path, (err, files) => {
     let tempImage = `${workingDirectory}${image}`;
     tempImages.push(tempImage);
 
-    sharp(path + '/' + image)
+    sharp(path + image)
       .metadata()
       .then(metadata => {
         if (metadata.width > metadata.height) {
@@ -82,7 +82,7 @@ fs.readdir(path, (err, files) => {
 
   if (tempImages.length > 0) {
     let videoOptions = {
-      fps: fps,
+      framerate: framerate,
       loop: 1, // seconds TODO: Make this an arg
       transition: false, // TODO: Make this an arg
       size: '800x?', // TODO: Make this an arg
