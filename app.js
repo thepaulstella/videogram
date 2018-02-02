@@ -28,16 +28,16 @@ process.argv.forEach(function (val, index, array) {
 });
 
 if (parseInt(framerate)) {
-  framerate = parseInt(framerate)
+  framerate = parseInt(framerate);
 } else {
   console.error(`framerate must be an integer. default framerate is 24. example: framerate='60'`);
   process.exit();
 }
 
 if (parseInt(quality) <= 100 && parseInt(quality) >= 1) {
-  quality = parseInt(quality)
+  quality = parseInt(quality);
 } else {
-  console.error(`quality must be an integer between 1 and 100. default quality is 90. example: quality='90'`);
+  console.error(`quality must be an integer between 1 and 100. default quality is 90. example: quality='50'`);
   process.exit();
 }
 
