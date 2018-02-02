@@ -1,12 +1,13 @@
 const videoshow = require('videoshow');
-const Jimp = require('jimp');
+const sharp = require('sharp');
 const fs = require('fs');
 const rimraf = require('rimraf');
 
-var path = '';
-var outputFilename = '';
-var fps = 24
-var tempImages = [];
+let path = '';
+let outputFilename = '';
+let fps = 24
+let tempImages = [];
+let quality = 90; // TODO: Make this an arg
 
 process.argv.forEach(function (val, index, array) {
   if (val.match(/images=/)) {
@@ -26,51 +27,57 @@ if (fps !== '') {
   if (parseInt(fps)) {
     fps = parseInt(fps)
   } else {
-    console.error(`fps must be an integer. default fps is 24. example: fps='60'`)
+    console.error(`fps must be an integer. default fps is 24. example: fps='60'`);
     process.exit();
   }
 }
 
 if (path === '') {
-  console.error(`images required. example: images='./path/to/images'`)
+  console.error(`images required. example: images='./path/to/images'`);
   process.exit();
 }
 
 if (outputFilename === '') {
-  console.error(`filename required. example: video='filename-for-video'`)
+  console.error(`filename required. example: video='filename-for-video'`);
   process.exit();
 }
 
-var workingDirectory = `${path}videogram-tmp/`;
+let workingDirectory = `${path}videogram-tmp/`;
 if (!fs.existsSync(workingDirectory)) {
   fs.mkdirSync(workingDirectory);
 }
 
 fs.readdir(path, (err, files) => {
-  // let filePaths = files.map(file => path + file);
   let images = files.filter(file => file.match(/(.jpg|.jpeg|.png)/));
-  console.log('Processing images...')
+  console.log('Processing images...');
 
   images.map(image => {
-    var tempImage = `${workingDirectory}${image}`;
+    let tempImage = `${workingDirectory}${image}`;
     tempImages.push(tempImage);
 
-    fs.writeFileSync(tempImage, fs.readFileSync(`${path}${image}`));
+    sharp(path + '/' + image)
+      .metadata()
+      .then(metadata => {
+        if (metadata.width > metadata.height) {
+          return sharp(path + image)
+            .resize(metadata.width, metadata.width)
+            .background({r: 0, g: 0, b: 0, alpha: 0})
+            .embed()
+            .jpeg({quality: quality})
+            .toFile(tempImage);
+        }
 
-    Jimp.read(tempImage, (err, img) => {
-      if (img.bitmap.height !== img.bitmap.width) {
-        if (img.bitmap.height > img.bitmap.width) {
-          img
-            .contain(img.bitmap.height, img.bitmap.height)
-            .write(tempImage)
+        if (metadata.height > metadata.width) {
+          return sharp(path + image)
+            .resize(metadata.height, metadata.height)
+            .background({r: 0, g: 0, b: 0, alpha: 0})
+            .embed()
+            .jpeg({quality: quality})
+            .toFile(tempImage);
         }
-        if (img.bitmap.width > img.bitmap.height) {
-          img
-            .contain(img.bitmap.width, img.bitmap.width)
-            .write(tempImage)
-        }
-      }
-    })
+
+        return sharp(path + image).jpeg({quality: quality}).toFile(tempImage);
+      });
   });
 
   if (tempImages.length > 0) {
@@ -83,8 +90,10 @@ fs.readdir(path, (err, files) => {
       videoCodec: 'libx264', // TODO: Make this an arg
       format: 'mp4', // TODO: Make this an arg
       pixelFormat: 'yuv420p' // TODO: Make this an arg
-    }
+    };
 
+    console.log('Images processed.');
+    console.log('Processing video...');
     videoshow(tempImages, videoOptions)
       .save(`${outputFilename}.mp4`)
       .on('error', function (err, stdout, stderr) {
