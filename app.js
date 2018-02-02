@@ -21,15 +21,24 @@ process.argv.forEach(function (val, index, array) {
   if (val.match(/framerate=/)) {
     framerate = val.substring(10)
   }
+
+  if (val.match(/quality=/)) {
+    framerate = val.substring(8)
+  }
 });
 
-if (framerate !== '') {
-  if (parseInt(framerate)) {
-    framerate = parseInt(framerate)
-  } else {
-    console.error(`framerate must be an integer. default framerate is 24. example: framerate='60'`);
-    process.exit();
-  }
+if (parseInt(framerate)) {
+  framerate = parseInt(framerate)
+} else {
+  console.error(`framerate must be an integer. default framerate is 24. example: framerate='60'`);
+  process.exit();
+}
+
+if (parseInt(quality)) {
+  quality = parseInt(quality)
+} else {
+  console.error(`quality must be an integer between 1 and 100. default quality is 90. example: quality='90'`);
+  process.exit();
 }
 
 if (path === '') {
