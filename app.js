@@ -7,7 +7,7 @@ let path = '';
 let outputFilename = '';
 let framerate = 24
 let tempImages = [];
-let quality = 90; // TODO: Make this an arg
+let quality = 90;
 
 process.argv.forEach(function (val, index, array) {
   if (val.match(/images=/)) {
@@ -23,7 +23,7 @@ process.argv.forEach(function (val, index, array) {
   }
 
   if (val.match(/quality=/)) {
-    framerate = val.substring(8)
+    quality = val.substring(8)
   }
 });
 
@@ -34,7 +34,7 @@ if (parseInt(framerate)) {
   process.exit();
 }
 
-if (parseInt(quality)) {
+if (parseInt(quality) <= 100 && parseInt(quality) >= 1) {
   quality = parseInt(quality)
 } else {
   console.error(`quality must be an integer between 1 and 100. default quality is 90. example: quality='90'`);
