@@ -61,22 +61,22 @@ fs.readdir(path, (err, files) => {
         if (metadata.width > metadata.height) {
           return sharp(path + image)
             .resize(metadata.width, metadata.width)
-            .background({r: 0, g: 0, b: 0, alpha: 0})
+            .background({ r: 0, g: 0, b: 0, alpha: 0 })
             .embed()
-            .jpeg({quality: quality})
+            .jpeg({ quality: quality })
             .toFile(tempImage);
         }
 
         if (metadata.height > metadata.width) {
           return sharp(path + image)
             .resize(metadata.height, metadata.height)
-            .background({r: 0, g: 0, b: 0, alpha: 0})
+            .background({ r: 0, g: 0, b: 0, alpha: 0 })
             .embed()
-            .jpeg({quality: quality})
+            .jpeg({ quality: quality })
             .toFile(tempImage);
         }
 
-        return sharp(path + image).jpeg({quality: quality}).toFile(tempImage);
+        return sharp(path + image).jpeg({ quality: quality }).toFile(tempImage);
       });
   });
 
