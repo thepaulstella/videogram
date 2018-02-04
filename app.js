@@ -1,12 +1,14 @@
 const videoshow = require('videoshow');
 const sharp = require('sharp');
-const fs = require('fs');
 const rimraf = require('rimraf');
+const async = require('asyncawait/async');
+const await = require('asyncawait/await');
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
 
 let path = '';
 let outputFilename = '';
 let framerate = 24
-let tempImages = [];
 let quality = 90;
 
 process.argv.forEach(function (val, index, array) {
@@ -70,62 +72,82 @@ if (!fs.existsSync(workingDirectory)) {
   fs.mkdirSync(workingDirectory);
 }
 
-fs.readdir(path, (err, files) => {
-  let images = files.filter(file => file.match(/(.jpg|.jpeg|.png)/));
-  console.log('Processing images...');
+let getImages = async((dir) => {
+  let files = await(fs.readdirAsync(dir));
+  return files.filter(file => file.match(/(.jpg|.jpeg|.png)/));
+});
 
-  images.map(image => {
-    let tempImage = `${workingDirectory}${image}`;
-    tempImages.push(tempImage);
+let processImage = async((image) => {
+  let tempImage = `${workingDirectory}${image}`;
 
+  return new Promise((resolve, reject) => {
     sharp(path + image)
-      .metadata()
-      .then(metadata => {
-        if (metadata.width > metadata.height) {
-          return sharp(path + image)
-            .resize(metadata.width, metadata.width)
-            .background({ r: 0, g: 0, b: 0, alpha: 0 })
-            .embed()
-            .jpeg({ quality: quality })
-            .toFile(tempImage);
-        }
+    .metadata()
+    .then(metadata => {
+      if (metadata.width > metadata.height) {
+        sharp(path + image)
+          .resize(metadata.width, metadata.width)
+          .background({ r: 0, g: 0, b: 0, alpha: 0 })
+          .embed()
+          .jpeg({ quality: quality })
+          .toFile(tempImage)
+          .then(() => resolve(tempImage));
+      }
 
-        if (metadata.height > metadata.width) {
-          return sharp(path + image)
-            .resize(metadata.height, metadata.height)
-            .background({ r: 0, g: 0, b: 0, alpha: 0 })
-            .embed()
-            .jpeg({ quality: quality })
-            .toFile(tempImage);
-        }
+      if (metadata.height > metadata.width) {
+        sharp(path + image)
+          .resize(metadata.height, metadata.height)
+          .background({ r: 0, g: 0, b: 0, alpha: 0 })
+          .embed()
+          .jpeg({ quality: quality })
+          .toFile(tempImage)
+          .then(() => resolve(tempImage));
+      }
 
-        return sharp(path + image).jpeg({ quality: quality }).toFile(tempImage);
-      });
+      sharp(path + image)
+        .jpeg({ quality: quality })
+        .toFile(tempImage)
+        .then(() => resolve(tempImage));
+    });
   });
+});
 
-  if (tempImages.length > 0) {
-    let videoOptions = {
-      framerate: framerate,
-      loop: 1, // seconds TODO: Make this an arg
-      transition: false, // TODO: Make this an arg
-      size: '800x?', // TODO: Make this an arg
-      videoBitrate: 2048, // TODO: Make this an arg
-      videoCodec: 'libx264', // TODO: Make this an arg
-      format: 'mp4', // TODO: Make this an arg
-      pixelFormat: 'yuv420p' // TODO: Make this an arg
-    };
+let processImages = async((images) => {
+  let processedImages = await(images.map(image => processImage(image)))
+  return processedImages;
+});
 
-    console.log('Images processed.');
+let processVideo = async((images) => {
+  let videoOptions = {
+    framerate: framerate,
+    loop: 1, // seconds TODO: Make this an arg
+    transition: false, // TODO: Make this an arg
+    size: '800x?', // TODO: Make this an arg
+    videoBitrate: 2048, // TODO: Make this an arg
+    videoCodec: 'libx264', // TODO: Make this an arg
+    format: 'mp4', // TODO: Make this an arg
+    pixelFormat: 'yuv420p' // TODO: Make this an arg
+  };
+
+  return new Promise((resolve, reject) => {
+    videoshow(images, videoOptions)
+    .save(`${outputFilename}.mp4`)
+    .on('error', function (err, stdout, stderr) {
+      resolve(`Error: ${stderr}`);
+    })
+    .on('end', function (output) {
+      resolve(`Video created in ${output}`);
+    });
+  })
+});
+
+getImages(path).then(images => {
+  console.log('Processing images...');
+  processImages(images).then(processedImages => {
     console.log('Processing video...');
-    videoshow(tempImages, videoOptions)
-      .save(`${outputFilename}.mp4`)
-      .on('error', function (err, stdout, stderr) {
-        console.error('Error:', err);
-        console.error('ffmpeg stderr:', stderr);
-      })
-      .on('end', function (output) {
-        rimraf.sync(workingDirectory); // TODO: Won't get here if no images found
-        console.log('Video created in:', output);
-      });
-  }
+    processVideo(processedImages).then(result => {
+      rimraf.sync(workingDirectory)
+      console.log(result);
+    });
+  });
 });

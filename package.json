@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "asyncawait": "^1.0.6",
+    "bluebird": "^3.5.1",
     "node-stopwatch": "0.0.1",
     "rimraf": "^2.6.2",
     "sharp": "^0.19.0",
