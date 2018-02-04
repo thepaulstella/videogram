@@ -133,7 +133,7 @@ let processVideo = async((images) => {
     videoshow(images, videoOptions)
     .save(`${outputFilename}.mp4`)
     .on('error', function (err, stdout, stderr) {
-      resolve(`Error: ${stderr}`);
+      resolve(`Error: ${err}`);
     })
     .on('end', function (output) {
       resolve(`Video created in ${output}`);
